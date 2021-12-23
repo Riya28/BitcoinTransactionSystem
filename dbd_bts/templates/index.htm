@@ -1,0 +1,768 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bitcoin Wallet</title>
+    <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsee.css' %}">
+    <link rel="stylesheet" href="{% static 'owl-carousel/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'owl-carousel/owl.theme.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+   
+    <link rel="stylesheet" href="{% static 'css/template-style.css' %}">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="{% static 'js/validation.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+  </head>  
+  
+  <body class="size-1140">
+  	<a target="_blank" class="hide-s" href="../template/prospera-premium-responsive-business-template/" style="position:fixed;top:120px;right:-14px;z-index:10;"></a>
+    
+    <header role="banner">    
+     
+    
+      <nav class="background-white background-primary-hightlight">
+        <div class="line">
+          <div class="s-12 l-2">
+            <h2 class="logo" style="font-size: 25px;"><b>Bitcoin Wallet</b></h2>
+          </div>
+          <div class="top-nav s-12 l-10">
+            <p class="nav-text"></p>
+            <ul class="right chevron">
+              <li><a href="/" style="background-color: black">Home</a></li>
+             
+
+              {% if user.is_authenticated %}
+              <li><a href="profile">Hello, {{user.username}}</a></li>
+              <li><a href="logout">Logout</a></li>
+              {% else %}
+              <li><a href="register">Register</a></li>
+              <li><a href="login">Login</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+    
+    
+    <main role="main">
+     
+      {% if user.is_authenticated %}
+
+      <section class="section background-white">
+      <div align="center">
+              <style>
+                .results tr[visible='false'],
+                  .no-result{
+                    display:none;
+                  }
+
+                  .results tr[visible='true']{
+                    display:table-row;
+                  }
+
+                  .counter{
+                    padding:8px; 
+                    color:#ccc;
+                  }
+                .button {
+                  border-radius: 25px;
+                  background-color: #4CAF50; 
+                  border: none;
+                  color: white;
+                  padding: 16px 32px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;
+                  margin: 4px 2px;
+                  transition-duration: 0.4s;
+                  cursor: pointer;
+                }
+                
+                .button1 {
+                  border-radius: 25px;
+                  background-color: white !important; 
+                  color: white; 
+                  border: 2px solid #000000;
+                }
+                
+                .button1:hover {
+                  background-color: black !important;
+                  color: #56e2f5;
+                }
+
+              
+              </style>
+              <p>
+                {% if error %}
+                Error: {{error}}
+                {% endif %}
+              </p>
+              <p>
+                Current BTC Rate 
+                <span>
+                  1 BTC = {{btc_rate}} USD
+
+                </span>
+              </p>
+              {% if request.user.user_type != 'Manager' %}
+            
+          
+            <!-- Wallet Balance -->
+            {% if request.user.user_type == 'Client' %}
+            <div >
+              Wallet Balance
+              <p>
+                USD Balance : {{request.user.usd_balance}}
+              </p>
+              <p>
+                BTC Balance : {{request.user.btc_balance}}
+              </p>
+              {% endif %}
+              <!-- Button trigger modal -->
+           
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deposit-modal">
+            Deposit 
+           
+            
+          </button>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#trade-modal">
+            Trade
+          </button>
+          {% endif %}
+
+              <div class="modal" tabindex="-1" role="dialog" id="deposit-modal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Deposit</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="POST">
+                        {% csrf_token %}
+                        {% if request.user.user_type == 'Trader'   %}
+                        
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Select Client</label>
+                          <select class="form-control" aria-describedby="emailHelp" placeholder="Select Client" name="client-id">
+                              {% for item in clients %}
+                                <option value="{{item.id}}"> {{item.first_name}}</option>
+                                {% endfor %}
+                                </select>
+                        </div>
+                        {% endif %}
+
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">USD Amount</label>
+                        <input type="number" class="form-control" aria-describedby="emailHelp" placeholder="Enter Amount" name="usd-amount">
+                        <small id="emailHelp" class="form-text text-muted">USD amount</small>
+                      </div>
+                      <button type="submit" class="btn btn-primary" name="payment-btn">Submit</button>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal" tabindex="-1" role="dialog" id="trade-modal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Deposit</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="POST">
+                        {% csrf_token %}
+                        {% if request.user.user_type == 'Trader'   %}
+                        
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Select Client</label>
+                          <select class="form-control" aria-describedby="emailHelp" placeholder="Select Client" name="client-id">
+                              {% for item in clients %}
+                                <option value="{{item.id}}"> {{item.first_name}}</option>
+                                {% endfor %}
+                                </select>
+                        </div>
+                        {% endif %}
+                      <input type="hidden" value="{{btc_rate}}" name="btc-rate"> 
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Order Type</label>
+                      <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="customRadioInline1" name="order-type" class="custom-control-input" checked="checked" value="buy">
+                        <label class="custom-control-label" for="customRadioInline1">Buy</label>
+                      </div>
+                      <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="customRadioInline2" name="order-type" class="custom-control-input" value="sell">
+                        <label class="custom-control-label" for="customRadioInline2">Sell</label>
+                      </div>
+                      </div>
+
+
+                      <div class="form-group text-left" id="buy-usd-amount">
+                        <label for="exampleInputEmail1">USD Amount</label>
+                        <input type="number" class="form-control" aria-describedby="emailHelp" placeholder="Enter Amount" name="buy-usd-amount" step="0.01" min="100" >
+                      </div>
+                      <div class="form-group text-left" id="buy-btc-amount">
+                        <label for="exampleInputEmail1">BTC Amount</label>
+                        <input type="number" class="form-control" aria-describedby="emailHelp" placeholder="Enter Amount" name="buy-btc-amount" step="0.000001" min="0.001"  >
+                      </div>
+
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Commission Type</label>
+                      <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="customRadioInline3" name="comm-type" class="custom-control-input" checked="checked" value="btc">
+                        <label class="custom-control-label" for="customRadioInline3">BTC</label>
+                      </div>
+                      <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="customRadioInline4" name="comm-type" class="custom-control-input" value="usd">
+                        <label class="custom-control-label" for="customRadioInline4">USD</label>
+                      </div>
+                      </div>
+
+                      <button type="submit" class="btn btn-primary" name="trade-btn">Submit</button>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+      </div><br>
+      </section>    
+
+      <div align="center" id="sendbitcoin">
+       
+        
+        <p style="max-width: 400px; min-width: 100px;">
+          
+        </p>
+        <button onclick="getpk()" style="border-radius: 20px;">
+       
+        </button><br>
+        <div id="pk" >
+          <h3><b></b></h3>
+          <b>{{user.last_name}}</b>
+        </div>
+        
+      </div>
+
+      <div align="center" id="receivebitcoin">
+        <h1></h1>
+
+        <style>
+          .tooltip {
+            position: relative;
+            display: inline-block;
+          }
+          
+          .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -75px;
+            opacity: 0;
+            transition: opacity 0.3s;
+          }
+          
+          .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+          }
+          
+          .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+          }
+          </style>
+          
+          
+          
+          <input type="text" size="50" style="border-radius: 20px;" value="{{user.first_name}}" id="myInput" readonly>
+          
+          <div class="tooltip">
+          <button onclick="myFunction()" onmouseout="outFunc()" style="border-radius: 20px;">
+            <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
+            Copy Address
+          </button>
+
+          
+          </div><br><br>
+
+          <h2>Or Scan Your QR Code Below</h2>
+          
+          <div>
+            <img align="center" src="https://bitref.com/qrcode.php?data={{user.first_name}}">
+          </div>
+          
+          <script>
+          function myFunction() {
+            var copyText = document.getElementById("myInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            
+            var tooltip = document.getElementById("myTooltip");
+            tooltip.innerHTML = "Copied: " + copyText.value;
+          }
+          
+          function outFunc() {
+            var tooltip = document.getElementById("myTooltip");
+            tooltip.innerHTML = "Copy to clipboard";
+          }
+          </script>
+      </div><!--<br><br><br><br><br><br><br>-->
+      {% if request.user.user_type == 'Trader'   %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">List of Clients</h5>
+          <input type="text" class="search form-control" placeholder="Search Client?">
+          </div>
+          <span class="counter pull-right"></span>
+          <table class="table table-hover table-bordered results">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="col-md-5 col-xs-5">Name</th>
+                <th class="col-md-4 col-xs-4">USD Balance</th>
+                <th class="col-md-3 col-xs-3">BTC Balance</th>
+              </tr>
+              <tr class="warning no-result">
+                <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in clients %}
+              
+              <tr>
+                <th scope="row">{{item.id}}</th>
+                <td>{{item.first_name}}</td>
+                <td>{{item.usd_balance}}</td>
+                <td>{{item.btc_balance}}</td>
+              </tr>
+               {% endfor %}
+             
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+        {% if request.user.user_type != 'Manager'   %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">List of Transaction</h5>
+            <input type="text" class="search form-control" placeholder="Search Client?">
+            </div>
+            <span class="counter pull-right"></span>
+            <table class="table table-hover table-bordered results">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th class="col-md-5 col-xs-5">Client</th>
+                  <th class="col-md-5 col-xs-5">Time</th>
+                  <th class="col-md-4 col-xs-4">USD </th>
+                  <th class="col-md-4 col-xs-4">Status </th>
+                  <th class="col-md-3 col-xs-3">Actions</th>
+                </tr>
+                <tr class="warning no-result">
+                  <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in txns %}
+
+                {% if request.user.user_type == 'Client' and request.user.id == item.client_id.id   %}
+                
+                <tr>
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.client_id.first_name}}</td>
+                  <td>{{item.timestamp}}</td>
+                  <td style="width: 30px;">{{item.usd_amount}}</td>
+                  <td>{{item.status}}</td>
+                  <td>{% if item.status == 'Completed' %}
+                    <a  href="#" class="cancel-txn"  data-val="{{item.id}}" > Cancel Transaction</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.client_id.first_name}}</td>
+                  <td>{{item.timestamp}}</td>
+                  <td>{{item.usd_amount}}</td>
+                  <td>{{item.status}}</td>
+                  <td>{% if item.status == 'Completed' %}
+                    <a  href="#" class="cancel-txn"  data-val="{{item.id}}" > Cancel Transaction</a>
+                    {% endif %}
+                  </td>
+                </tr>
+
+                {% endif %}
+                 {% endfor %}
+               
+              </tbody>
+            </table>
+          </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">List of Payments</h5>
+            <input type="text" class="search form-control" placeholder="Search Client?">
+            </div>
+            <span class="counter pull-right"></span>
+            <table class="table table-hover table-bordered results">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th class="col-md-5 col-xs-5">Client</th>
+                  <th class="col-md-5 col-xs-5">Time</th>
+                  <th class="col-md-4 col-xs-4">USD </th>
+                  <th class="col-md-4 col-xs-4">Status </th>
+                  <th class="col-md-3 col-xs-3">Actions</th>
+                </tr>
+                <tr class="warning no-result">
+                  <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in payments %}
+
+                {% if request.user.user_type == 'Client' and request.user.id == item.client_id.id   %}
+                
+                <tr>
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.client_id.first_name}}</td>
+                  <td>{{item.timestamp}}</td>
+                  <td>{{item.usd_amount}}</td>
+                  <td>{{item.status}}</td>
+                  <td>{% if item.status == 'Completed' %}
+                    <a  href="#" class="cancel-payment"  data-val="{{item.id}}" > Cancel Payment</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.client_id.first_name}}</td>
+                  <td>{{item.timestamp}}</td>
+                  <td>{{item.usd_amount}}</td>
+                  <td>{{item.status}}</td>
+                  <td>{% if item.status == 'Completed' %}
+                    <a  href="#" class="cancel-payment"  data-val="{{item.id}}" > Cancel Payment</a>
+                    {% endif %}
+                  </td>
+                </tr>
+
+                {% endif %}
+                 {% endfor %}
+               
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+        {% if request.user.user_type == 'Manager'   %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">List of Users</h5>
+          <input type="text" class="search form-control" placeholder="Search User?">
+          </div>
+          <span class="counter pull-right"></span>
+          <table class="table table-hover table-bordered results">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="col-md-5 col-xs-5">Name</th>
+                <th class="col-md-5 col-xs-5">User Type</th>
+                <th class="col-md-4 col-xs-4">USD Balance</th>
+                <th class="col-md-3 col-xs-3">BTC Balance</th>
+              </tr>
+              <tr class="warning no-result">
+                <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in users %}
+              
+              <tr>
+                <th scope="row">{{item.id}}</th>
+                <td>{{item.first_name}}</td>
+                <td>{{item.user_type}}</td>
+                <td>{{item.usd_balance}}</td>
+                <td>{{item.btc_balance}}</td>
+              </tr>
+               {% endfor %}
+             
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+      <script>
+        document.getElementById("receivebitcoin").style.display = "none";
+        document.getElementById("sendbitcoin").style.display = "none";
+        document.getElementById("pk").style.display = "none";
+        function receiveFunction() {
+          var x = document.getElementById("receivebitcoin");
+          var y = document.getElementById("details");
+          var z = document.getElementById("sendbitcoin")
+          var pk = document.getElementById("pk")
+          if (x.style.display === "none") {
+            z.style.display = "none";
+            y.style.display = "none";
+            x.style.display = "block";
+          } else {
+            z.style.display = "none";
+            x.style.display = "none";
+            y.style.display = "block";
+          }
+        }
+        function sendFunction() {
+          var x = document.getElementById("receivebitcoin");
+          var y = document.getElementById("details");
+          var z = document.getElementById("sendbitcoin")
+          if (z.style.display === "none") {
+            z.style.display = "block";
+            y.style.display = "none";
+            x.style.display = "none";
+          } else {
+            z.style.display = "none";
+            x.style.display = "none";
+            y.style.display = "block";
+          }
+        }
+        function getpk(){
+          pk.style.display = "block";
+        }
+      </script>
+
+      
+
+      <section id="details">
+      <style>
+          table {
+              width:100%;
+            }
+            table, th, td {
+              border: 1px solid rgb(90, 86, 86);
+              border-collapse: collapse;
+            }
+            th, td {
+              padding: 15px;
+              text-align: left;
+            }
+            table#t01 tr:nth-child(even) {
+              background-color: #eee;
+            }
+            table#t01 tr:nth-child(odd) {
+             background-color: #fff;
+            }
+            table#t01 th {
+              background-color: white;
+              color: white;
+            }
+      </style>
+      <br>
+      
+      <form action="/" method="POST">
+        {% csrf_token %}
+
+        <style>
+            .button {
+              border-radius: 25px;
+              background-color: #4CAF50; 
+              border: none;
+              color: white;
+              padding: 16px 32px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              margin: 4px 2px;
+              transition-duration: 0.4s;
+              cursor: pointer;
+            }
+            
+            .button1 {
+              border-radius: 25px;
+              background-color: #000000; 
+              color: black; 
+              border: 2px solid #000000;
+            }
+            
+            .button1:hover {
+              background-color: white;
+              color: white;
+            }
+        </style>
+
+        <input type="hidden" name="addr" value="{{user.first_name}}"><br>
+        
+      </form>
+
+      </section>
+
+      {% else %}
+      <section style="background-color: white;">
+        <div class="line">
+          <div class="carousel-fade-transition owl-carousel carousel-main carousel-nav-white carousel-wide-arrows">
+            <div class="item">
+              <div class="s-8 center">
+                <img src="{% static 'img/bgimage.jpg' %}" alt="">
+                <div class="carousel-content">
+                  <div class="padding-2x">
+                    <div class="s-12 m-12 l-8">
+                      <p class="text-white text-s-size-20 text-m-size-40 text-l-size-60 margin-bottom-40 text-thin text-line-height-1"><b>Get Your Bitcoin Wallet In Seconds</b></p>
+                      <p class="text-white text-size-16 margin-bottom-40"></p>  
+                    </div>                  
+                  </div>
+                </div>
+              </div>
+            </div>
+           
+          </div>  
+        </div>
+      </section>
+      
+      <section class="section background-white">
+        <div class="line">
+          <h2 class="text-thin headline text-center text-s-size-30 margin-bottom-50">Start Your Trading Journey Now!</h2>
+          
+          
+        </div>    
+      </section>
+      {% endif %}
+    </main>
+    
+    
+    <footer>
+     
+      <section class="padding background-dark">
+        <div class="line">
+          <div class="s-12 l-6">
+            <p class="text-size-12"> <b id="year"></b>
+            	 Bitcoin Wallet 
+			</p>
+           
+          </div>
+          <div class="s-12 l-6">
+            <a class="right text-size-12" href="#" title="Responsee - lightweight responsive framework"><br> <p align="center"></p></a>
+          </div>
+        </div>
+      </section>
+    </footer> 
+    <script type="text/javascript" src="{% static 'js/responsee.js' %}"></script>
+    <script type="text/javascript" src="{% static 'owl-carousel/owl.carousel.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/template-scripts.js' %}"></script>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
+   <!-- SEARCH  -->
+   <script>
+    $(document).ready(function() {
+      $(".search").keyup(function () {
+        var searchTerm = $(".search").val();
+        var listItem = $('.results tbody').children('tr');
+        var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+        
+      $.extend($.expr[':'], {'containsi': function(elem, i, match, array){
+            return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+        }
+      });
+        
+      $(".results tbody tr").not(":containsi('" + searchSplit + "')").each(function(e){
+        $(this).attr('visible','false');
+      });
+    
+      $(".results tbody tr:containsi('" + searchSplit + "')").each(function(e){
+        $(this).attr('visible','true');
+      });
+    
+      var jobCount = $('.results tbody tr[visible="true"]').length;
+        $('.counter').text(jobCount + ' item');
+    
+      if(jobCount == '0') {$('.no-result').show();}
+        else {$('.no-result').hide();}
+          });
+
+
+
+          $('input:radio[name=order-type]').change(function () {
+            console.log($("input[name='order-type']:checked").val())
+            if ($("input[name='order-type']:checked").val() == 'buy') {
+                $("#buy-btc-amount").hide()
+                $("#buy-usd-amount").show()
+            }
+            if ($("input[name='order-type']:checked").val() == 'sell') {
+              $("#buy-btc-amount").show()
+              $("#buy-usd-amount").hide()
+               
+            }
+          
+        });
+        $("#buy-btc-amount").hide()
+
+        $(".cancel-payment").on("click",function(e){
+          e.preventDefault();
+          $.ajax({
+            url: "/",
+            method:"POST",
+            data : {"payment-cancel-id":$(this).data('val'),'csrfmiddlewaretoken':"{{csrf_token}}"},
+            success: function (result) {
+                window.location.reload()
+            }
+        });
+        })
+
+        $(".cancel-txn").on("click",function(e){
+          e.preventDefault();
+          $.ajax({
+            url: "/",
+            method:"POST",
+            data : {"txn-cancel-id":$(this).data('val'),'csrfmiddlewaretoken':"{{csrf_token}}"},
+            success: function (result) {
+                window.location.reload()
+            }
+        });
+        })
+        
+        
+    });
+
+
+
+    
+   </script>
+</body>
+</html>

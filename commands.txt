@@ -1,0 +1,20 @@
+Group Memebers:
+Bhuvana Iyer - bci190000
+Riya Bhargava - rxb190058
+Mariam Aafreen - mxm210042
+Hasika Nune - hxn210010
+
+
+#Executing the below commands to setup the django project
+python -m pip install --upgrade pip
+python -m pip install django
+#Creating django project
+django-admin startproject project .
+#Creating django app
+python manage.py startapp user
+#Running the django app
+python manage.py runserver
+#Migrating models.py to db
+python manage.py makemigrations wallet
+python manage.py sqlmigrate wallet 0001
+python manage.py migrate
